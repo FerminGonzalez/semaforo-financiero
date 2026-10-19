@@ -58,13 +58,13 @@ try {
 }
 run("git push -u origin main", ROOT);
 
-// 4. gh-pages: rama limpia con solo el build
+// 4. gh-pages: rama limpia con solo el build (archivos en la RAIZ de la rama)
 const TMP = `/tmp/opencode/ghp-${REPO}`;
 rmSync(TMP, { recursive: true, force: true });
 mkdirSync(TMP, { recursive: true });
-cpSync(join(ROOT, "dist"), join(TMP, "site"), { recursive: true });
+cpSync(join(ROOT, "dist"), TMP, { recursive: true });
 // GitHub Pages necesita un .nojekyll para no romper rutas con guion bajo
-execSync("touch .nojekyll", { cwd: join(TMP, "site") });
+execSync("touch .nojekyll", { cwd: TMP });
 run("git init -b gh-pages", TMP);
 run("git add -A", TMP);
 run(`git commit -m "deploy ${new Date().toISOString()}"`, TMP);
