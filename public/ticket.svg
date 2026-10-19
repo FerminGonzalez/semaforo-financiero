@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Ticket">
+  <path d="M14 8h36v50l-6-4-6 4-6-4-6 4-6-4-6 4z" fill="#1c2942" stroke="#26334f" stroke-width="2"/>
+  <path d="M22 22h20M22 30h20M22 38h12" stroke="#60a5fa" stroke-width="3" stroke-linecap="round"/>
+</svg>

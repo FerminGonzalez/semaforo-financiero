@@ -1,0 +1,31 @@
+{
+  "name": "semaforo-financiero",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Semáforo Financiero de Bolsillo: PWA local-first que traduce notas caoticas de una microempresa informal en un semaforo de flujo de caja y una regla de decision para manana.",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --port 4173 --strictPort",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "record": "node scripts/record-demo.mjs"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "2.45.4",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "18.3.5",
+    "@types/react-dom": "18.3.0",
+    "@vitejs/plugin-react": "4.3.1",
+    "pg": "^8.23.1",
+    "playwright": "^1.64.1",
+    "typescript": "5.5.4",
+    "vite": "5.4.2",
+    "vite-plugin-pwa": "0.20.5",
+    "vitest": "2.0.5"
+  }
+}
