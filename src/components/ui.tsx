@@ -1,6 +1,5 @@
 import type { HTMLAttributes, ReactNode } from "react";
 import type { Status } from "../lib/insights";
-
 export function Card({
   children,
   className = "",
@@ -47,6 +46,14 @@ export function Bar({ value, tone }: { value: number; tone: Status }) {
   );
 }
 
-export function Pill({ children, tone = "neutral" }: { children: ReactNode; tone?: Status | "neutral" }) {
-  return <span className={`pill pill--${tone}`}>{children}</span>;
+export function Pill({
+  children,
+  tone = "neutral",
+  ...rest
+}: { children: ReactNode; tone?: Status | "neutral" } & HTMLAttributes<HTMLElement>) {
+  return (
+    <span className={`pill pill--${tone}`} {...rest}>
+      {children}
+    </span>
+  );
 }
