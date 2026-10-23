@@ -1,36 +1,38 @@
-# Guía del video (≤ 5 min)
+# Video de demostración (narración ya integrada)
 
-Video fuente: `artifacts/demo-semaforo.webm` (1:25), grabado automáticamente con Playwright.
-La idea es **narrar encima** este material (o usarlo tal cual) y subirlo a YouTube en modo
-**público u oculto**, sin necesidad de iniciar sesión.
+- **Archivo para subir:** `artifacts/demo-semaforo.mp4` (H.264, 390×844, **1:41**).
+  - Ruta Windows: `C:\Users\Ghost\semaforo-financiero\artifacts\demo-semaforo.mp4`
+- La **narración ya está integrada** como subtítulos/tarjetas de texto quemados en pantalla,
+  sincronizados con cada click. **No necesitas grabar voz en off.**
 
-## Estructura del material (coincide con el video)
+## Estructura (coincide con el video)
 
-| Tiempo | Beat | Qué se ve | Narración sugerida |
-| --- | --- | --- | --- |
-| 0:00–0:40 | El problema | Semáforo en rojo/ámbar: "Riesgo de no llegar" | "Marcos es mecánico. Ve entrar dinero todos los días, pero no sabe por qué no le alcanza. No le faltan datos: le sobran tickets y libretas. Le falta poder **leerlos**." |
-| 0:40–1:30 | El dato difícil | Tabla contable (EBITDA, pasivo, razón circulante) → toggle a lenguaje claro | "Esto es lo que un contador le entrega. El número es el mismo; la diferencia es si Marcos puede decidir con él. Aquí, en su idioma, es una sola línea." |
-| 1:30–2:40 | Captura offline | Se activa modo avión (banner "Sin señal"), dicta una frase, revisa los 2 movimientos, guarda | "Marcos está en el taller, sin señal. Habla como le hablaría a su ayudante. La app lo convierte en movimientos. Todo se guarda en el teléfono." |
-| 2:40–3:15 | Sincroniza | Vuelve la señal y sube a la nube | "Cuando vuelve la señal, sincroniza solo. La captura nunca esperó a la red." |
-| 3:15–4:00 | El resultado | "Regla para mañana" + cobra un trabajo pendiente | "El resultado no es un reporte: es una instrucción de 10 segundos. Cobra lo pendiente y el semáforo cambia." |
-| 4:00–cierre | Cierre | Semáforo actualizado, efectivo libre | "Mañana, Marcos ya sabe qué hacer. Eso es aprender algo útil y sostener una acción." |
+| Tiempo aprox. | Beat | Subtítulo en pantalla |
+| --- | --- | --- |
+| 0:00–0:20 | Problema | "Marcos tiene un taller mecánico… ve entrar dinero, pero no sabe por qué no le alcanza." |
+| 0:20–0:40 | El dato difícil | "Esto le entrega un contador: EBITDA, pasivo, razón circulante… el número es el mismo, ¿puede decidir con él?" |
+| 0:40–1:10 | Captura offline | "Marcos está en el taller sin señal. Habla como le hablaría a su ayudante. La app lo convierte en movimientos." |
+| 1:10–1:25 | Sincroniza | "Cuando vuelve la señal, sincroniza solo." |
+| 1:25–1:41 | Resultado | "El resultado no es un reporte: es una regla de 10 segundos. Mañana, Marcos ya sabe qué hacer." |
 
 ## Cómo subirlo y verificar el acceso (obligatorio antes de entregar)
 
-1. Sube `artifacts/demo-semaforo.webm` a YouTube. En **Visibilidad**, elige **Oculto** (o
-   **Público**). Evita "Privado" (exige permiso).
+1. Sube `artifacts/demo-semaforo.mp4` a YouTube. En **Visibilidad**, elige **Oculto** o
+   **Público** (evita "Privado", que exige permiso).
 2. Copia el enlace.
-3. **Abre una ventana de incógnito** y pega el enlace:
+3. Abre una **ventana de incógnito** y pega el enlace:
    - Debe reproducir **sin pedir inicio de sesión** ni permiso.
-   - Confirma que la **duración ≤ 5:00** (este material es 1:25; si agregas voz en off o
-     título, revisa que el corte final no supere los 5 minutos).
+   - Confirma que la **duración ≤ 5:00** (este video es 1:41 ✓).
 
-## Opcional: agregar voz en off
+## Regenerar el video (si cambias algo de la app)
 
-Puedes grabar la narración de la tabla de arriba y montarla sobre el video. Si no puedes
-grabar, publica el material tal cual: el recorrido ya se entiende sin audio.
+```bash
+npm run build && npm run preview &   # o: npx vite preview --port 4173
+node scripts/record-demo.mjs         # genera artifacts/demo-semaforo.webm
+# y luego convierte:
+ffmpeg -y -i artifacts/demo-semaforo.webm -c:v libx264 -preset slow -crf 20 \
+  -pix_fmt yuv420p -movflags +faststart artifacts/demo-semaforo.mp4
+```
 
-## Enlaces que conviene mencionar en la descripción
-
-- Demo en vivo: `https://<usuario>.github.io/semaforo-financiero/`
-- Evidencia de la necesidad: ver `docs/REFERENCIAS.md`
+> Los subtítulos se definen en `scripts/record-demo.mjs` (función `caption(...)`). Edita ahí
+> los textos y sus tiempos para ajustar la narración.

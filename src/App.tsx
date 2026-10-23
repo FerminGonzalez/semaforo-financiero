@@ -3,6 +3,7 @@ import { Asesor } from "./components/Asesor";
 import { Captura } from "./components/Captura";
 import { Diagnostico } from "./components/Diagnostico";
 import { Semaforo } from "./components/Semaforo";
+import { Analytics } from "./components/Analytics";
 import { Pill } from "./components/ui";
 import { cloudConfigured, pullTransactions, pushUnsynced } from "./lib/cloud";
 import { useOnline } from "./lib/connectivity";
@@ -10,12 +11,13 @@ import { buildInsights } from "./lib/insights";
 import { store, useStore } from "./lib/store";
 import { money } from "./lib/types";
 
-type Tab = "hoy" | "capturar" | "diagnostico" | "asesor";
+type Tab = "hoy" | "capturar" | "diagnostico" | "asesor" | "analytics";
 
 const TABS: Array<{ id: Tab; label: string; icon: string }> = [
   { id: "hoy", label: "Hoy", icon: "🚦" },
   { id: "capturar", label: "Capturar", icon: "🎙️" },
   { id: "diagnostico", label: "Mi plan", icon: "📌" },
+  { id: "analytics", label: "Análisis", icon: "📊" },
   { id: "asesor", label: "Asesor", icon: "🧑‍🏫" }
 ];
 
@@ -102,6 +104,13 @@ export function App() {
         ) : null}
         {tab === "capturar" ? <Captura onDone={() => setTab("hoy")} /> : null}
         {tab === "diagnostico" ? <Diagnostico state={state} insights={insights} /> : null}
+        {tab === "analytics" ? (
+          <Analytics
+            distribution={insights.expenseDistribution}
+            trend={insights.cashFlowTrend}
+            cashAvailable={insights.cashAvailable}
+          />
+        ) : null}
         {tab === "asesor" ? <Asesor insights={insights} /> : null}
       </main>
 

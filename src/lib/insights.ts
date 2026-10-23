@@ -1,6 +1,7 @@
 // Traduce los movimientos a decisiones. Aqui es donde el "dato que un experto
 // entiende y Marcos no" se convierte en semaforo + una regla de decision.
 
+import { generateDailyRule } from "./decisions";
 import type { Commitment, PendingJob, Tx } from "./types";
 import { money } from "./types";
 
@@ -34,6 +35,9 @@ export interface Insights {
   actionBecause: string;
   tomorrowRule: string;
   jargon: JargonRow[];
+  // --- Nuevos datos para Visual Analytics ---
+  expenseDistribution: { category: string; amount: number; percentage: number }[];
+  cashFlowTrend: { day: string; balance: number }[];
 }
 
 const WEEKDAYS = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
@@ -151,13 +155,17 @@ export function buildInsights(input: BuildInsightsInput): Insights {
   }
 
   let tomorrowRule: string;
-  if (status === "red") {
-    tomorrowRule = `Mañana NO compres inventario. Primero cobra${input.pendingJobs.length ? ` los ${input.pendingJobs.length} trabajos pendientes (${money(receivable)})` : " lo que tengas pendiente"} y paga ${upcoming[0] ? upcoming[0].label : "tus fijos"}.`;
-  } else if (status === "amber") {
-    tomorrowRule = `Mañana compra solo lo indispensable. Antes de surtir refacciones, cobra al menos ${money(Math.max(0, Math.ceil(deficit)))}.`;
-  } else {
-    tomorrowRule = `Mañana sí puedes surtir, pero no pases de ${money(Math.max(0, Math.floor(cashAvailable - upcomingTotal)))} para no tocar el dinero de tus pagos.`;
-  }
+  const rule = generateDailyRule({
+    transactions: input.transactions,
+    commitments: input.commitments,
+    pendingJobs: input.pendingJobs,
+    settings: {} as any // No necesitamos settings para la regla
+  });
+  tomorrowRule = rule.action;
+  // Podemos añadir la razón al principio o final para dar contexto
+  // tomorrowRule = `${rule.action} (${rule.reason})`;
+
+  const directCost = monthTx
 
   const directCost = monthTx
     .filter((t) => t.kind === "expense" && ["Refacciones", "Herramienta", "Proveedor"].includes(t.category))
@@ -217,6 +225,46 @@ export function buildInsights(input: BuildInsightsInput): Insights {
     }
   ];
 
+  // --- CÁLCULOS PARA VISUAL ANALYTICS ---
+
+  // 1. Distribución de Gastos (Mapa de Calor)
+  const categoryTotals: Record<string, number> = {};
+  input.transactions
+    .filter((t) => t.kind === "expense")
+    .forEach((t) => {
+      categoryTotals[t.category] = (categoryTotals[t.category] || 0) + t.amount;
+    });
+
+  const expenseDistribution = Object.entries(categoryTotals)
+    .map(([category, amount]) => ({
+      category,
+      amount,
+      percentage: monthExpense > 0 ? amount / monthExpense : 0
+    }))
+    .sort((a, b) => b.amount - a.amount);
+
+  // 2. Tendencia de Flujo (Próximos 7 días)
+  const cashFlowTrend = Array.from({ length: 7 }).map((_, i) => {
+    const date = new Date(now);
+    date.setDate(now.getDate() + i);
+    const dayStr = dayKey(date);
+
+    // Sumamos ingresos y restamos gastos proyectados/históricos
+    const dayNet = input.transactions
+      .filter((t) => t.day === dayStr)
+      .reduce((acc, t) => t.kind === "income" ? acc + t.amount : acc - t.amount, 0);
+
+    // Sumamos compromisos que caen ese día
+    const dailyCommitments = input.commitments
+      .filter((c) => c.dueWeekday === date.getDay())
+      .reduce((acc, c) => acc - c.amount, 0);
+
+    return {
+      day: date.toLocaleDateString("es-MX", { weekday: "short" }),
+      balance: cashAvailable + dayNet + dailyCommitments
+    };
+  });
+
   return {
     day: { income: dayIncome, expense: dayExpense, net: dayIncome - dayExpense, count: todayTx.length },
     month: { income: monthIncome, expense: monthExpense, net: monthIncome - monthExpense },
@@ -233,6 +281,8 @@ export function buildInsights(input: BuildInsightsInput): Insights {
     suggestedAction,
     actionBecause,
     tomorrowRule,
-    jargon
+    jargon,
+    expenseDistribution,
+    cashFlowTrend
   };
 }

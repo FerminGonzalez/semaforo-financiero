@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState } from "react";
-import { DEMO_PHRASES, parseDictado } from "../lib/parser";
+import { DEMO_PHRASES } from "../lib/parser";
+import { smartParse } from "../lib/ai-parser";
 import { newId, store } from "../lib/store";
 import { CATEGORIES, money, todayKey, type ParsedEntry, type Tx, type TxKind } from "../lib/types";
 import { useOnline } from "../lib/connectivity";
@@ -61,10 +62,19 @@ export function Captura({ onDone }: { onDone: () => void }) {
     setListening(true);
   };
 
-  const interpret = () => {
-    const entries = parseDictado(text, { day: todayKey() });
-    setDrafts(entries);
-    setSaved(null);
+  const [interpreting, setInterpreting] = useState(false);
+
+  const interpret = async () => {
+    setInterpreting(true);
+    try {
+      const entries = await smartParse(text);
+      setDrafts(entries);
+      setSaved(null);
+    } catch (e) {
+      console.error("AI Parse Error:", e);
+    } finally {
+      setInterpreting(false);
+    }
   };
 
   const patchDraft = (index: number, patch: Partial<ParsedEntry>) => {
@@ -164,8 +174,13 @@ export function Captura({ onDone }: { onDone: () => void }) {
           ))}
         </div>
 
-        <button className="btn btn--primary btn--wide" onClick={interpret} disabled={!text.trim()} data-testid="interpret-button">
-          Interpretar con el semáforo
+        <button
+          className="btn btn--primary btn--wide"
+          onClick={interpret}
+          disabled={!text.trim() || interpreting}
+          data-testid="interpret-button"
+        >
+          {interpreting ? "Consultando al cerebro IA..." : "Interpretar con el semáforo"}
         </button>
       </Card>
 
